@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linkwrox Dashboard</title>
+    <link rel="stylesheet" href="/static/css/linkwrox.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Linkwrox <span class="version">v1.0.0-Optimized</span></a>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">Dashboard</a>
+                <a href="/generate" class="nav-link">Generate</a>
+                <a href="/docs" class="nav-link">API Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="alerts"></div>
+
+        <!-- Header -->
+        <div class="card">
+            <div class="card-header">
+                <h1>Linkwrox Dashboard</h1>
+                <p>Proprietary LinkedIn LLM System - Developer: Kritarth</p>
+            </div>
+            <div class="card-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalPosts">0</div>
+                        <div class="stat-label">Posts Generated</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgProfessionalism">85.5%</div>
+                        <div class="stat-label">Avg Professionalism</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Theme Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="modelStatus">Loaded</div>
+                        <div class="stat-label">Model Status</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">System Information</div>
+                <div class="card-body">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">System:</span>
+                            <span class="info-value">Linkwrox v1.0.0-Optimized</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Owner:</span>
+                            <span class="info-value">Kritarth Ranjan (Kritarth123-prince)</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Created:</span>
+                            <span class="info-value">2025-07-10 17:51:16 UTC</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Copyright:</span>
+                            <span class="info-value">© 2025 Kritarth Ranjan</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">License:</span>
+                            <span class="info-value">Proprietary - All Rights Reserved</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Supported Themes</div>
+                <div class="card-body">
+                    <div class="themes-grid" id="themesGrid">
+                        <!-- Themes loaded by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">Quick Actions</div>
+            <div class="card-body">
+                <div class="actions-grid">
+                    <a href="/generate" class="btn btn-primary">Generate Post</a>
+                    <a href="/docs" class="btn btn-secondary">API Documentation</a>
+                    <button class="btn btn-success" onclick="loadStats()">Refresh Stats</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <strong>Linkwrox</strong> - Proprietary LinkedIn LLM System<br>
+            Copyright © 2025 Kritarth Ranjan - All Rights Reserved<br>
+            Developer: Kritarth Ranjan | Version: 1.0.0-Optimized<br>
+            Created: 2025-07-10 17:51:16 UTC
+        </div>
+    </footer>
+
+    <script src="/static/js/linkwrox.js"></script>
+    <script>
+        // Load dashboard data
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadThemes();
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                document.getElementById('totalPosts').textContent = stats.total_posts;
+                document.getElementById('avgProfessionalism').textContent = stats.avg_professionalism + '%';
+                document.getElementById('modelStatus').textContent = stats.model_loaded ? 'Loaded' : 'Not Loaded';
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function loadThemes() {
+            try {
+                const response = await fetch('/api/themes');
+                const data = await response.json();
+                
+                const grid = document.getElementById('themesGrid');
+                grid.innerHTML = data.themes.map(theme => 
+                    `<div class="theme-tag">${theme.replace('_', ' ').toUpperCase()}</div>`
+                ).join('');
+            } catch (error) {
+                console.error('Failed to load themes:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Post - Linkwrox</title>
+    <link rel="stylesheet" href="/static/css/linkwrox.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Linkwrox <span class="version">v1.0.0-Optimized</span></a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Dashboard</a>
+                <a href="/generate" class="nav-link active">Generate</a>
+                <a href="/docs" class="nav-link">API Docs</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="alerts"></div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div id="loadingMessage">Generating LinkedIn post...</div>
+        </div>
+
+        <!-- Generation Form -->
+        <div class="card">
+            <div class="card-header">
+                <h1>Generate LinkedIn Post</h1>
+                <p>Create professional LinkedIn content with Linkwrox AI</p>
+            </div>
+            <div class="card-body">
+                <form id="generateForm">
+                    <div class="form-group">
+                        <label class="form-label">Prompt (Optional)</label>
+                        <textarea 
+                            class="form-control" 
+                            name="prompt" 
+                            rows="3" 
+                            placeholder="Enter a prompt to guide the post generation (e.g., 'After 10 years in tech...')"
+                        ></textarea>
+                        <small class="form-text">Leave empty for automatic generation</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Theme</label>
+                        <div class="theme-selector" id="themeSelector">
+                            <!-- Themes loaded by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Max Length</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="max_length" 
+                                value="150" 
+                                min="50" 
+                                max="300"
+                            >
+                            <small class="form-text">Maximum number of words</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Temperature</label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                name="temperature" 
+                                value="0.8" 
+                                min="0.1" 
+                                max="1.0" 
+                                step="0.1"
+                            >
+                            <small class="form-text">Creativity level (0.1-1.0)</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">
+                        Generate LinkedIn Post
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Generated Output -->
+        <div id="generatedOutput"></div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <strong>Linkwrox</strong> - Proprietary LinkedIn LLM System<br>
+            Copyright © 2025 Kritarth Ranjan - All Rights Reserved<br>
+            Owner: Kritarth123-prince | Version: 1.0.0-Optimized
+        </div>
+    </footer>
+
+    <script src="/static/js/linkwrox.js"></script>
+    <script>
+        let selectedTheme = 'career_advice';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadThemes();
+            setupForm();
+        });
+
+        async function loadThemes() {
+            try {
+                const response = await fetch('/api/themes');
+                const data = await response.json();
+                
+                const selector = document.getElementById('themeSelector');
+                selector.innerHTML = data.themes.map(theme => 
+                    `<div class="theme-option" data-theme="${theme}">
+                        ${theme.replace('_', ' ').toUpperCase()}
+                    </div>`
+                ).join('');
+
+                // Add click handlers
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        document.querySelectorAll('.theme-option').forEach(opt => 
+                            opt.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        selectedTheme = e.target.dataset.theme;
+                    });
+                });
+
+                // Select first theme
+                if (selector.firstElementChild) {
+                    selector.firstElementChild.classList.add('selected');
+                }
+            } catch (error) {
+                console.error('Failed to load themes:', error);
+            }
+        }
+
+        function setupForm() {
+            document.getElementById('generateForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await generatePost();
+            });
+        }
+
+        async function generatePost() {
+            const form = document.getElementById('generateForm');
+            const formData = new FormData(form);
+
+            const data = {
+                prompt: formData.get('prompt') || '',
+                theme: selectedTheme,
+                max_length: parseInt(formData.get('max_length')) || 150,
+                temperature: parseFloat(formData.get('temperature')) || 0.8
+            };
+
+            showLoading();
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayGeneratedPost(result);
+                    showAlert('Post generated successfully!', 'success');
+                } else {
+                    showAlert(result.detail || 'Generation failed', 'error');
+                }
+            } catch (error) {
+                showAlert('Network error: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function displayGeneratedPost(result) {
+            const output = document.getElementById('generatedOutput');
+            
+            // Extract content and branding
+            const fullPost = result.post;
+            const brandingStart = fullPost.indexOf('\n\nGenerated by Linkwrox');
+            
+            let mainContent = fullPost;
+            let brandingContent = '';
+            
+            if (brandingStart !== -1) {
+                mainContent = fullPost.substring(0, brandingStart);
+                brandingContent = fullPost.substring(brandingStart + 2); // +2 to skip \n\n
+            }
+            
+            output.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        Generated LinkedIn Post - Theme: ${result.metadata.theme_display}
+                    </div>
+                    <div class="card-body">
+                        <div class="post-output">
+                            ${mainContent}
+                        </div>
+                        
+                        <div class="branding-section" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem; color: #6c757d; border-left: 4px solid #007bff;">
+                            ${brandingContent}
+                        </div>
+                        
+                        <div class="grid-2 mt-3">
+                            <div>
+                                <h3>Analysis</h3>
+                                <div class="info-list">
+                                    <div class="info-item">
+                                        <span class="info-label">Word Count:</span>
+                                        <span class="info-value">${result.analysis.word_count}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Professionalism:</span>
+                                        <span class="info-value">${(result.analysis.professionalism_score * 100).toFixed(1)}%</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Keywords:</span>
+                                        <span class="info-value">${result.analysis.professional_keywords}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Readability:</span>
+                                        <span class="info-value">${result.analysis.readability}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3>Settings</h3>
+                                <div class="info-list">
+                                    <div class="info-item">
+                                        <span class="info-label">Temperature:</span>
+                                        <span class="info-value">${result.metadata.temperature}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Max Length:</span>
+                                        <span class="info-value">${result.metadata.max_length}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Generated:</span>
+                                        <span class="info-value">${new Date().toLocaleString()}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Prompt Used:</span>
+                                        <span class="info-value">${result.metadata.prompt || 'Auto-generated'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="actions-grid mt-3">
+                            <button class="btn btn-primary" onclick="copyMainContent('${mainContent.replace(/'/g, "\\'")}')">
+                                Copy Content Only
+                            </button>
+                            <button class="btn btn-secondary" onclick="copyFullPost('${fullPost.replace(/'/g, "\\'")}')">
+                                Copy Full Post
+                            </button>
+                            <button class="btn btn-success" onclick="downloadPost(${JSON.stringify(result).replace(/"/g, '&quot;')})">
+                                Download
+                            </button>
+                            <button class="btn btn-warning" onclick="generatePost()">
+                                Generate Another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            output.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyMainContent(content) {
+            navigator.clipboard.writeText(content).then(() => {
+                showAlert('Main content copied to clipboard!', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy to clipboard', 'error');
+            });
+        }
+
+        function copyFullPost(content) {
+            navigator.clipboard.writeText(content).then(() => {
+                showAlert('Full post copied to clipboard!', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy to clipboard', 'error');
+            });
+        }
+
+        function downloadPost(result) {
+            const content = `LinkedIn Post - Generated by Linkwrox
+Theme: ${result.metadata.theme_display}
+Generated: ${new Date().toLocaleString()}
+Prompt: ${result.metadata.prompt || 'Auto-generated'}
+
+=== MAIN CONTENT ===
+${result.post.substring(0, result.post.indexOf('\n\nGenerated by Linkwrox'))}
+
+=== FULL POST WITH BRANDING ===
+${result.post}
+
+=== ANALYSIS ===
+- Word Count: ${result.analysis.word_count}
+- Professionalism: ${(result.analysis.professionalism_score * 100).toFixed(1)}%
+- Professional Keywords: ${result.analysis.professional_keywords}
+- Readability: ${result.analysis.readability}
+
+=== SETTINGS ===
+- Temperature: ${result.metadata.temperature}
+- Max Length: ${result.metadata.max_length}
+
+Owner: Kritarth123-prince
+Copyright © 2025 Kritarth Ranjan - All Rights Reserved
+Generated by Linkwrox v1.0.0-Optimized
+`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `linkwrox_${result.theme}_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
