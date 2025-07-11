@@ -2,7 +2,6 @@
 
 > **Proprietary LinkedIn Content Generation System**  
 > **Developer:** Kritarth Ranjan  
-> **User:** Kritarth123-prince  
 > **Date:** 2025-07-10 20:09:42  
 > **Version:** 1.0.0-Optimized  
 > **Copyright © 2025 Kritarth Ranjan - All Rights Reserved**
@@ -395,7 +394,6 @@ curl -X POST http://127.0.0.1:8080/api/generate \
 
 **Primary Contact:**
 - **Developer:** Kritarth Ranjan
-- **User:** Kritarth123-prince
 - **System:** Linkwrox v1.0.0-Optimized
 - **Created:** 2025-07-10 20:09:42
 
@@ -480,7 +478,6 @@ This software and its associated documentation are proprietary and confidential 
 - **Features:** 10 professional themes, advanced text cleaning
 - **Performance:** 85.5% average professionalism score
 - **Developer:** Kritarth Ranjan
-- **User:** Kritarth123-prince
 
 ### Future Roadmap
 - Enhanced authentication system
@@ -509,7 +506,6 @@ Linkwrox represents the pinnacle of LinkedIn content generation technology, comb
 
 ### Contact Information
 - **🧑‍💻 Developer:** Kritarth Ranjan
-- **👤 User:** Kritarth123-prince
 - **📅 Created:** 2025-07-10 20:09:42
 - **🏷️ Version:** 1.0.0-Optimized
 - **📧 System:** Linkwrox LinkedIn LLM API
