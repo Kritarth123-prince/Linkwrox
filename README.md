@@ -125,7 +125,7 @@ choco install python git curl
 
 ```bash
 # 1. Clone or download the repository
-git clone <repository-url>
+git clone https://github.com/Kritarth123-prince/Linkwrox
 cd linkwrox
 
 # 2. Create virtual environment (recommended)
