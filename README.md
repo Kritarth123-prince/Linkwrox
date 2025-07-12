@@ -1,8 +1,7 @@
 # 🚀 Linkwrox - LinkedIn LLM API
 
 > **Proprietary LinkedIn Content Generation System**  
-> **Developer:** Kritarth Ranjan  
-> **Date:** 2025-07-10 20:09:42  
+> **Developer:** Kritarth Ranjan
 > **Version:** 1.0.0-Optimized  
 > **Copyright © 2025 Kritarth Ranjan - All Rights Reserved**
 
@@ -14,6 +13,7 @@
 - [Supported Themes](#-supported-themes)
 - [Project Structure](#-project-structure)
 - [Installation](#%EF%B8%8F-installation)
+- [Docker Deployment](#-docker-deployment)
 - [Running the Application](#-running-the-application)
 - [API Endpoints](#-api-endpoints)
 - [Testing](#-testing)
@@ -34,6 +34,7 @@ The system leverages transformer-based architectures for natural language genera
 - **🧠 Advanced Cleaning** - Intelligent text processing and optimization
 - **🔗 RESTful API** - Complete FastAPI backend with auto-generated documentation
 - **🖥️ Web Dashboard** - Interactive frontend for easy content management
+- **🐳 Docker Hub Ready** - Pre-built Docker image available on Docker Hub
 - **📊 High Accuracy** - 85.5% average professionalism score
 - **🔧 Configurable Parameters** - Temperature, length, and theme controls
 - **📈 Performance Monitoring** - Built-in health checks and statistics
@@ -81,6 +82,7 @@ linkwrox/
 ├── 📄 tokenizer.py              # Text tokenization and processing
 ├── 📄 training_pipeline.py      # Model training and evaluation pipeline
 ├── 📄 requirements.txt          # Python dependencies
+├── 🐳 Dockerfile               # Docker configuration
 ├── 📖 README.md                # This documentation
 ├── 📁 static/                  # Static web assets
 │   ├── 🎨 linkwrox.css         # Custom stylesheet
@@ -154,6 +156,187 @@ python linkwrox_api.py
 python run_server.py
 ```
 
+## 🐳 Docker Deployment
+
+### Docker Hub Ready Image
+
+Linkwrox is available as a pre-built Docker image on Docker Hub for instant deployment:
+
+**Docker Hub Repository:** `kritarthranjan/linkwrox:latest`
+
+#### Quick Docker Deployment
+
+```bash
+# Pull and run the latest image from Docker Hub
+docker pull kritarthranjan/linkwrox:latest
+docker run -d -p 8080:8080 --name linkwrox-container kritarthranjan/linkwrox:latest
+
+# Access the application
+curl http://localhost:8080/api/health
+```
+
+#### Docker Hub Deployment Commands
+
+```bash
+# Method 1: Direct run from Docker Hub
+docker run -d -p 8080:8080 --name linkwrox-production kritarthranjan/linkwrox:latest
+
+# Method 2: Run with volume mounts for persistence
+docker run -d -p 8080:8080 \
+  -v linkwrox_models:/app/models \
+  -v linkwrox_logs:/app/api_logs \
+  -v linkwrox_output:/app/generated_output \
+  --name linkwrox-persistent \
+  kritarthranjan/linkwrox:latest
+
+# Method 3: Run with custom environment variables
+docker run -d -p 8080:8080 \
+  -e PYTHONUNBUFFERED=1 \
+  -e LINKWROX_HOST=0.0.0.0 \
+  -e LINKWROX_PORT=8080 \
+  --name linkwrox-custom \
+  kritarthranjan/linkwrox:latest
+
+# Method 4: Run with restart policy
+docker run -d -p 8080:8080 \
+  --restart=unless-stopped \
+  --name linkwrox-auto \
+  kritarthranjan/linkwrox:latest
+```
+
+#### Docker Compose with Docker Hub Image
+
+```yaml name=docker-compose.yml
+version: '3.8'
+
+services:
+  linkwrox-api:
+    image: kritarthranjan/linkwrox:latest
+    container_name: linkwrox-container
+    ports:
+      - "8080:8080"
+    volumes:
+      - linkwrox_models:/app/models
+      - linkwrox_logs:/app/api_logs
+      - linkwrox_output:/app/generated_output
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      - LINKWROX_HOST=0.0.0.0
+      - LINKWROX_PORT=8080
+    restart: unless-stopped
+    labels:
+      - "com.linkwrox.service=api"
+      - "com.linkwrox.version=1.0.0-Optimized"
+      - "com.linkwrox.developer=Kritarth Ranjan"
+      - "com.linkwrox.source=Docker Hub"
+
+volumes:
+  linkwrox_models:
+  linkwrox_logs:
+  linkwrox_output:
+```
+
+#### Deploy with Docker Compose
+
+```bash
+# Create docker-compose.yml file and run
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Update to latest version
+docker-compose pull
+docker-compose up -d
+```
+
+### Building and Publishing Your Own Image
+
+If you want to build and publish your own version:
+
+```bash
+# Build the image locally
+docker build -t linkwrox:latest .
+
+# Tag for Docker Hub (replace with your username)
+docker tag linkwrox:latest your-username/linkwrox:latest
+
+# Login to Docker Hub
+docker login
+
+# Push to Docker Hub
+docker push your-username/linkwrox:latest
+```
+
+#### Developer's Docker Hub Publishing Process
+
+```bash
+# Developer: Kritarth Ranjan's publishing process
+docker build -t linkwrox:latest .
+docker tag linkwrox:latest kritarthranjan/linkwrox:latest
+docker push kritarthranjan/linkwrox:latest
+
+# Repository: https://hub.docker.com/r/kritarthranjan/linkwrox
+```
+
+### Docker Management Commands
+
+```bash
+# Check running containers
+docker ps
+
+# View container logs
+docker logs linkwrox-container
+
+# Stop container
+docker stop linkwrox-container
+
+# Start container
+docker start linkwrox-container
+
+# Restart container
+docker restart linkwrox-container
+
+# Remove container
+docker rm linkwrox-container
+
+# Update to latest image
+docker pull kritarthranjan/linkwrox:latest
+docker stop linkwrox-container
+docker rm linkwrox-container
+docker run -d -p 8080:8080 --name linkwrox-container kritarthranjan/linkwrox:latest
+```
+
+### Production Deployment
+
+```bash
+# Production deployment with all best practices
+docker run -d \
+  --name linkwrox-production \
+  -p 8080:8080 \
+  --restart=unless-stopped \
+  --memory=2g \
+  --cpus=2 \
+  -v linkwrox_models:/app/models \
+  -v linkwrox_logs:/app/api_logs \
+  -v linkwrox_output:/app/generated_output \
+  -e PYTHONUNBUFFERED=1 \
+  -e LINKWROX_HOST=0.0.0.0 \
+  -e LINKWROX_PORT=8080 \
+  --health-cmd="curl -f http://localhost:8080/api/health || exit 1" \
+  --health-interval=30s \
+  --health-timeout=10s \
+  --health-retries=3 \
+  kritarthranjan/linkwrox:latest
+
+# Check health status
+docker inspect linkwrox-production | grep Health
+```
+
 ## 🚀 Running the Application
 
 ### Local Development
@@ -167,6 +350,9 @@ python run_server.py
 
 # Method 3: Using uvicorn directly
 uvicorn linkwrox_api:app --host 127.0.0.1 --port 8080 --reload
+
+# Method 4: Using Docker Hub image
+docker run -d -p 8080:8080 kritarthranjan/linkwrox:latest
 ```
 
 ### Production Deployment
@@ -178,6 +364,9 @@ gunicorn linkwrox_api:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8
 
 # Background service
 nohup python linkwrox_api.py > linkwrox.log 2>&1 &
+
+# Docker production deployment
+docker run -d -p 8080:8080 --restart=unless-stopped kritarthranjan/linkwrox:latest
 ```
 
 ## 🌐 API Endpoints
@@ -242,7 +431,6 @@ Content-Type: application/json
     "temperature": 0.7,
     "max_length": 200,
     "prompt": "sharing insights about remote work productivity",
-    "generated_at": "2025-07-10T20:09:42.123456Z",
     "theme_display": "Professional Development",
     "model_used": "Linkwrox AI Model",
     "developer": "Kritarth Ranjan",
@@ -395,7 +583,6 @@ curl -X POST http://127.0.0.1:8080/api/generate \
 **Primary Contact:**
 - **Developer:** Kritarth Ranjan
 - **System:** Linkwrox v1.0.0-Optimized
-- **Created:** 2025-07-10 20:09:42
 
 ### Documentation Resources
 
@@ -410,11 +597,15 @@ curl -X POST http://127.0.0.1:8080/api/generate \
 - **Health Check:** http://127.0.0.1:8080/api/health
 - **Statistics:** http://127.0.0.1:8080/api/stats
 
+#### Docker Hub
+- **Repository:** https://hub.docker.com/r/kritarthranjan/linkwrox
+- **Latest Image:** `kritarthranjan/linkwrox:latest`
+
 ### Quick Reference Commands
 
 #### Essential Commands
 ```bash
-# Start server
+# Start server locally
 python linkwrox_api.py
 
 # Train model
@@ -422,6 +613,9 @@ python main.py --mode train
 
 # Health check
 curl http://127.0.0.1:8080/api/health
+
+# Docker deployment
+docker run -d -p 8080:8080 kritarthranjan/linkwrox:latest
 
 # Generate content
 curl -X POST http://127.0.0.1:8080/api/generate \
@@ -473,10 +667,11 @@ This software and its associated documentation are proprietary and confidential 
 
 ## 🔄 Version History
 
-### v1.0.0-Optimized (2025-07-10 20:09:42)
+### v1.0.0-Optimized
 - **Initial Release:** Complete LinkedIn LLM API system
 - **Features:** 10 professional themes, advanced text cleaning
 - **Performance:** 85.5% average professionalism score
+- **Docker Hub:** Published to kritarthranjan/linkwrox:latest
 - **Developer:** Kritarth Ranjan
 
 ### Future Roadmap
@@ -495,6 +690,7 @@ Linkwrox represents the pinnacle of LinkedIn content generation technology, comb
 - **✅ 100% Theme Accuracy** - Perfect theme matching
 - **⚡ Sub-2 Second Response** - Lightning-fast generation
 - **🎯 85.5% Professionalism** - High-quality output
+- **🐳 Docker Hub Ready** - One-command deployment
 - **🔧 Easy Deployment** - Simple setup process
 - **📊 Comprehensive Testing** - Full test coverage
 
@@ -502,18 +698,25 @@ Linkwrox represents the pinnacle of LinkedIn content generation technology, comb
 - **Backend:** FastAPI + Python 3.9+
 - **AI/ML:** PyTorch + Transformers
 - **Frontend:** HTML5 + CSS3 + JavaScript
+- **Deployment:** Docker + Docker Hub
 - **Testing:** Postman + cURL
 
 ### Contact Information
 - **🧑‍💻 Developer:** Kritarth Ranjan
-- **📅 Created:** 2025-07-10 20:09:42
 - **🏷️ Version:** 1.0.0-Optimized
 - **📧 System:** Linkwrox LinkedIn LLM API
+- **🐳 Docker Hub:** kritarthranjan/linkwrox:latest
 
 ---
 
 **🚀 Ready to revolutionize your LinkedIn content creation with Linkwrox!**
 
 *Transform your professional presence with AI-powered content generation that never sleeps.*
+
+**🐳 Docker Hub Deployment:**
+```bash
+docker pull kritarthranjan/linkwrox:latest
+docker run -d -p 8080:8080 kritarthranjan/linkwrox:latest
+```
 
 **Copyright © 2025 Kritarth Ranjan - All Rights Reserved**
